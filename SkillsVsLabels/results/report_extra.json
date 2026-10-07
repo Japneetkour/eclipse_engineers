@@ -1,0 +1,25 @@
+{
+ "cv_auc": {
+  "JDS logistic": [
+   0.886,
+   0.068
+  ],
+  "JDS tree (depth 3)": [
+   0.768,
+   0.09
+  ],
+  "SDS logistic": [
+   0.964,
+   0.033
+  ],
+  "SDS logistic + squares": [
+   0.975,
+   0.026
+  ],
+  "SDS tree (depth 3)": [
+   0.942,
+   0.039
+  ]
+ },
+ "cosine_da_ds": 0.471
+}

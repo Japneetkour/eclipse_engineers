@@ -1,0 +1,77 @@
+======================================================================================================================
+WHEN DOES SALARY GROWTH FLATTEN? - analytics_clean.csv, salary = salary_avg_lakh band midpoint
+======================================================================================================================
+n = 14800   experience = avg_exp (min/max mid)   salary has only 6 distinct values: 1.5L, 4.5L, 8L, 12.5L, 20L, 37.5L
+
+======================================================================================================================
+SALARY PER EXPERIENCE YEAR (lakhs/year, band midpoints)
+======================================================================================================================
+  years       n       p25    median       p75
+      0     344       1.5       1.5       1.5
+      1     314       1.5       1.5       4.5
+      2    1697       1.5       1.5       4.5
+      3     803       1.5       4.5       8.0
+      4    3470       4.5       8.0      12.5
+      5     560       8.0       8.0      12.5
+      6    2461       8.0      12.5      20.0
+      7     296       8.0      12.5      20.0
+      8    1876      12.5      12.5      20.0
+      9     194      12.5      12.5      20.0
+     10    1209      12.5      20.0      20.0
+     11     145      12.5      12.5      20.0
+     12     593      12.5      20.0      37.5
+     13      80      12.5      20.0      37.5
+     14     255      20.0      20.0      37.5
+     15     212      12.5      20.0      37.5
+     16      95      20.0      20.0      37.5
+     17      22      20.0      37.5      37.5
+     18      86      20.0      37.5      37.5
+     19      10       8.0      16.2      33.1
+     20      53      20.0      37.5      37.5
+    21+      25      20.0      20.0      37.5
+
+======================================================================================================================
+QUANTILE REGRESSION: log(salary) ~ experience + experience^2   (q = 0.1, 0.5, 0.9)
+======================================================================================================================
+  quantile   turning pt (yr)  %/yr @0yr     @5yr    @10yr    @15yr   exp^2 p
+       0.1              15.8      53.0%    33.8%    17.0%     2.3%     0.000
+       0.5              13.0      51.1%    28.9%    10.0%    -6.1%     0.000
+       0.9              16.3      25.2%    16.8%     9.0%     1.7%     0.000
+turning point = experience where the fitted quadratic's yearly growth reaches 0%
+
+======================================================================================================================
+PIECEWISE REGRESSION - grid search over 1.0-20.0 years in 0.5-yr steps (39 candidates), least squares on log(salary)
+======================================================================================================================
+best 5 breakpoints by residual sum of squares:
+   breakpoint  6.5 yr   SSE  6937.815
+   breakpoint  6.0 yr   SSE  6940.286
+   breakpoint  7.0 yr   SSE  6946.262
+   breakpoint  5.5 yr   SSE  6965.853
+   breakpoint  7.5 yr   SSE  6975.225
+
+BEST BREAKPOINT = 6.5 YEARS   (model R2 = 0.477)
+growth BEFORE the break: +35.6% per year
+growth AFTER  the break: +7.4% per year   (slope change -28.2 pp/yr)
+bootstrap 95% CI for the breakpoint (B = 1000 resamples): 6.0 - 7.0 years  (median of bootstraps 6.5)
+bootstrap distribution: 6.0 yr = 35%, 6.5 yr = 62%, 7.0 yr = 3%
+
+======================================================================================================================
+PIECEWISE BREAKPOINT BY QUANTILE - same grid search, pinball loss instead of least squares
+======================================================================================================================
+  quantile  breakpoint (yr)   %/yr before   %/yr after
+       0.1             10.0         35.4%         0.0%
+       0.5              5.0         54.2%         8.9%
+       0.9             10.0         17.0%         0.0%
+
+median breaks at 5.0 yr, the 90th percentile at 10.0 yr -> difference +5.0 years
+share of postings sitting in the top band (37.5L, 25-50L raw): 6.7% overall, 25.8% at 10+ years, 56.1% at 17+ years
+
+======================================================================================================================
+FINAL ANSWER
+======================================================================================================================
+1. For a fresher: your pay climbs fastest in your first few years - about +36% a year up to 6.5 years of experience (95% CI 6.0-7.0 years), then only about +7% a year after that, so the big raises happen early.
+2. In rupees the median salary jumps from 1.5L (0-3 years) to 8L (4-5 years) to 12.5L (6-9 years) - about 8x while you are junior - then only crawls from 12.5L to 20L across 10-20 years, so a fresher wins most of the pay growth in the first ~6 years.
+3. Top earners do NOT flatten at the same point as the median: the median's curve breaks at 5.0 years (all-postings fit: 6.5 years) while the 90th percentile keeps rising until 10.0 years before flattening near 0% a year - but that flattening is partly an artefact, because 26% of 10+ year postings already sit in the top 25-50L band, so pay above it is never recorded.
+
+======================================================================================================================
+saved -> results/experience_quantiles.csv, experience_breakpoints.csv

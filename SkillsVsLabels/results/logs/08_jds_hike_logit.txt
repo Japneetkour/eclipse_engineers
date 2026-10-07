@@ -1,0 +1,64 @@
+======================================================================================================================
+HIGH vs LOW SALARY HIKE FOR JUNIOR DATA SCIENTISTS - jds_clean.csv, target = salary_hike_high_or_low
+======================================================================================================================
+n = 118 rows   |   high hike = 60 (50.8%)   low = 58 (49.2%)   |   5 skill scores on a ~2.2-5.0 scale
+1 SD of each skill (the odds-ratio unit): big_data 0.84, maths_stats 0.82, coding 0.89, ai_and_ml 0.70, storytelling 0.93
+
+======================================================================================================================
+REPEATED STRATIFIED 5-FOLD CV (5 folds x 10 repeats = 50 splits, stratified on the target)
+======================================================================================================================
+model                              ROC-AUC        accuracy       precision          recall              F1
+majority-class guess                     -           0.508               -               -               -               -
+logistic (all 5 skills)          0.886+-0.068       0.836+-0.080       0.831+-0.091       0.860+-0.098       0.842+-0.077
+decision tree (depth 3)          0.768+-0.090       0.739+-0.087       0.706+-0.077       0.840+-0.133       0.763+-0.092
+logistic beats the majority-class guess on accuracy by 32.7 pp and scores 0.886 ROC-AUC vs the 0.5 of random ranking
+
+======================================================================================================================
+ODDS RATIOS PER 1 SD OF THE SKILL (full-sample logit, all 5 skills in the model)
+======================================================================================================================
+skill             odds ratio              95% CI        p  reliable
+maths_stats            3.78x        [1.70, 8.45]    0.001       yes
+storytelling           3.12x        [1.61, 6.06]    0.001       yes
+ai_and_ml              2.43x        [1.26, 4.69]    0.008       yes
+big_data               2.43x        [1.31, 4.52]    0.005       yes
+coding                 1.50x        [0.82, 2.75]    0.189        no
+log-likelihood = -45.08   McFadden pseudo-R2 = 0.449
+
+======================================================================================================================
+DEPTH-3 DECISION TREE (fit on all rows, for comparison)
+======================================================================================================================
+|--- storytelling <= 4.15
+|   |--- maths_stats <= 4.60
+|   |   |--- class: 0
+|   |--- maths_stats >  4.60
+|   |   |--- storytelling <= 2.55
+|   |   |   |--- class: 0
+|   |   |--- storytelling >  2.55
+|   |   |   |--- class: 0
+|--- storytelling >  4.15
+|   |--- maths_stats <= 3.55
+|   |   |--- class: 0
+|   |--- maths_stats >  3.55
+|   |   |--- ai_and_ml <= 4.00
+|   |   |   |--- class: 0
+|   |   |--- ai_and_ml >  4.00
+|   |   |   |--- class: 1
+
+feature importances: big_data 0.00, maths_stats 0.29, coding 0.00, ai_and_ml 0.11, storytelling 0.60
+
+======================================================================================================================
+INTERACTION TEST: coding_skills x dashboard_and_storytelling_skills (both standardised)
+======================================================================================================================
+interaction term: coef = +0.355   odds ratio = 1.43 (95% CI 0.71 to 2.85)   Wald p = 0.315
+likelihood-ratio test vs the model without the interaction: chi2(1) = 0.99, p = 0.321
+verdict: drop the interaction (p = 0.321 >= 0.05) - no evidence that storytelling matters more when coding skills are high
+
+======================================================================================================================
+FINAL ANSWER
+======================================================================================================================
+1. The top 2 skills separating high from low hikes are maths_stats (odds ratio 3.8x per 1 SD, 95% CI 1.7x-8.4x, p = 0.001) and storytelling (3.1x, CI 1.6x-6.1x, p = 0.001): in plain words, a junior whose maths stats score is one SD (0.8 points) higher has about 4 times the odds of getting a high hike even when the other four skills are held equal, and the same one-SD edge in storytelling is worth about 3 times the odds.
+2. Yes, the model clearly beats guessing: repeated stratified 5-fold CV gives ROC-AUC 0.886 +- 0.068 (random = 0.500) and accuracy 83.6% +- 8.0% against the 50.8% you get by always predicting the majority class, with precision 0.83, recall 0.86 and F1 0.84; the depth-3 tree is weaker (AUC 0.768 +- 0.090) and leans on just maths_stats, ai_and_ml, storytelling.
+3. Confidence: with only n = 118 rows and 60 high-hike cases over 5 predictors (12 events per variable, just above the usual 10-per-variable rule of thumb) the direction of the top 2 skills is solid but the magnitudes are imprecise - their CIs run 1.7x-8.4x and 1.6x-6.1x, single splits swing AUC by ~0.07, and coding_skills alone is not significant (p = 0.19); the coding x storytelling interaction is not supported (LRT chi2(1) = 0.99, p = 0.32), so we cannot claim combined effects at this sample size.
+
+======================================================================================================================
+saved -> results/jds_odds_ratios.csv

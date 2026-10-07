@@ -1,0 +1,20 @@
+========================================================================================
+CLEANING LOG   rows in: 15841   rows out: 14800   dropped: 1041
+========================================================================================
+issue                                                   rows   action
+----------------------------------------------------------------------------------------
+experience not in 'N-M yrs' format                         0   min/max/avg_exp set to NaN
+experience above 40 years (implausible)                    0   flagged, left unchanged for review
+salary undisclosed or not a 'NtoM' band                    0   salary_missing=1, salary columns left NaN
+location spelling variants (Bangalore/Gurugram/…(area))    2273   standardised to one canonical city name
+cities mentioned in <50 postings                        1222   replaced with "Other" (rows with a major city keep it)
+distinct locations after cleaning                        344   kept as-is; use top locations or primary city as a model feature
+job_desig has no data/analyst/manager keyword           6437   title_family='Other' (titles kept unchanged in job_desig)
+junk/empty skill tokens ('...' etc.)                    1133   dropped before splitting
+row has none of the top 30 skills                       7327   all skill_xxx = 0 for that row (kept)
+duplicate posting (identical except s_no)               1041   dropped, keep='first'
+salary outside 3.0xIQR of log salary [0.05-1755.83 LPA]       0   dropped
+========================================================================================
+top 30 skills: sql, analytics, python, finance, java, r, sas, business analysis, machine learning, data analysis, digital marketing, javascript, project management, seo, data analytics, sales, excel, accounting, outsourcing, marketing, html, hadoop, spark, business process, data science, big data, business development, auditing, financial analysis, market research
+title_family: {'Other': 6163, 'Manager': 3702, 'Data Analyst': 3285, 'Data Engineer': 568, 'BI': 458, 'Data Scientist': 369, 'ML Engineer': 255}
+saved -> C:\Users\Admin\Downloads\SkillsVsLabels_Software - Copy\SkillsVsLabels\data\clean\analytics_clean.csv  (14800 rows x 44 cols)

@@ -1,0 +1,28 @@
+{
+  "salary": {
+    "rows": 14800,
+    "cv_r2": 0.537,
+    "cv_r2_sd": 0.026,
+    "typical_error_pct": 64.9
+  },
+  "hike": {
+    "roc_auc": 0.886,
+    "accuracy": 0.836,
+    "precision": 0.831,
+    "recall": 0.86,
+    "f1": 0.842,
+    "roc_auc_sd": 0.068,
+    "rows": 118,
+    "majority_guess": 0.508
+  },
+  "success": {
+    "roc_auc": 0.975,
+    "accuracy": 0.93,
+    "precision": 0.913,
+    "recall": 0.965,
+    "f1": 0.937,
+    "roc_auc_sd": 0.026,
+    "rows": 161,
+    "majority_guess": 0.528
+  }
+}

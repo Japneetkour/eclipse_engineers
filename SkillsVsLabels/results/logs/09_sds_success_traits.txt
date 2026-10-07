@@ -1,0 +1,63 @@
+======================================================================================================================
+PERSONALITY vs SUCCESS FOR SENIOR DATA SCIENTISTS - sds_clean.csv, target = success_high_low
+======================================================================================================================
+n = 161 rows   |   success = 85 (52.8%)   failure = 76 (47.2%)   |   Big Five scores ~17-68
+1 SD per trait: neuroticism 11.3, extraversion 12.1, openness 11.3, agreeableness 11.3, conscientiousness 13.2
+
+======================================================================================================================
+REPEATED STRATIFIED 5-FOLD CV (5 folds x 10 repeats = 50 splits, stratified on the target)
+======================================================================================================================
+model                                 ROC-AUC         accuracy        precision           recall               F1
+majority-class guess                        -            0.528                -                -                -                -
+logit: 5 traits (linear)            0.964+-0.033        0.927+-0.042        0.911+-0.062        0.960+-0.048        0.933+-0.037
+logit: + 5 squared terms            0.975+-0.026        0.930+-0.039        0.913+-0.055        0.965+-0.041        0.937+-0.034
+squared terms vs linear: CV AUC 0.975 - 0.964 = +0.010 (paired t on 10 repeat-means: t = 8.80, p = <0.001)
+
+======================================================================================================================
+ODDS RATIOS PER 1 SD (full-sample logit, all 5 traits in the model)
+======================================================================================================================
+trait              odds ratio                95% CI        p  reliable
+conscientiousness        26.5x        [5.81, 120.90]   <0.001       yes
+openness                20.8x         [5.77, 74.83]   <0.001       yes
+neuroticism              3.9x          [1.70, 9.04]    0.001       yes
+extraversion             3.9x         [1.50, 10.24]    0.005       yes
+agreeableness            2.5x          [0.98, 6.17]    0.056        no
+McFadden pseudo-R2 = 0.757
+
+======================================================================================================================
+SWEET SPOT - per-trait quadratic logits: success ~ z + z^2 (each trait alone; the joint 10-term
+quadratic MLE separates perfectly on n = 161, so inference is done one trait at a time)
+======================================================================================================================
+trait             z^2 coef   z^2 p  LRT chi2(1)   LRT p  peak (SD)  peak (raw)       range       shape
+neuroticism         -0.504   0.001        12.89  <0.001      +0.31          40       17-68  inverted-U
+extraversion        -1.308  <0.001        25.13  <0.001      +0.64          51       17-67  inverted-U
+openness            -1.874  <0.001        17.15  <0.001      +1.02          53       18-65  inverted-U
+agreeableness       -2.865  <0.001        82.02  <0.001      +0.35          49       17-68  inverted-U
+conscientiousness    -1.792   0.008        10.01   0.002      +0.90          57       18-66  inverted-U
+5 of 5 traits show a significant inverted-U with the peak inside the observed range (more is NOT always better)
+
+======================================================================================================================
+K-MEANS ON THE STANDARDISED BIG FIVE (k = 2 to 5, chosen by silhouette)
+======================================================================================================================
+k = 2: silhouette = 0.313   sizes = [93, 68]   success rates = 85%, 9%   clusters beating the 53% base rate (n >= 10): 1
+k = 3: silhouette = 0.301   sizes = [35, 85, 41]   success rates = 31%, 87%, 0%   clusters beating the 53% base rate (n >= 10): 1
+k = 4: silhouette = 0.327   sizes = [23, 88, 28, 22]   success rates = 0%, 89%, 0%, 32%   clusters beating the 53% base rate (n >= 10): 1
+k = 5: silhouette = 0.212   sizes = [47, 24, 48, 25, 17]   success rates = 85%, 0%, 88%, 0%, 18%   clusters beating the 53% base rate (n >= 10): 2
+
+chosen k = 4 (best silhouette 0.327); archetypes named from their trait z-profiles:
+archetype                     n  success   trait z-scores (neuroticism, extraversion, openness,
+                                           agreeableness, conscientiousness)
+driven achievers             88      89%   -0.22, +0.53, +0.59, +0.33, +0.65
+stressed veterans            22      32%   +1.61, -0.52, +0.18, -0.82, -0.63
+warm but unfocused           23       0%   -0.10, -0.42, -1.19, +1.08, -0.91
+reserved and detached        28       0%   -0.48, -0.93, -1.01, -1.28, -0.79
+
+======================================================================================================================
+FINAL ANSWER
+======================================================================================================================
+1. Traits that matter (odds ratio per 1 SD, all five in one logit): conscientiousness 26.5x (95% CI 5.8-120.9, p = <0.001) and openness 20.8x (CI 5.8-74.8, p = <0.001) dominate, then neuroticism 3.9x (p = 0.001), extraversion 3.9x (p = 0.005), agreeableness 2.5x (p = 0.056 - NOT significant); the model beats guessing with CV ROC-AUC 0.964 +- 0.033 and accuracy 92.7% vs the 52.8% majority guess.
+2. More is NOT always better: all 5 traits show a significant inverted-U (neuroticism, extraversion, openness, agreeableness, conscientiousness) with optima at neuroticism = 40, extraversion = 51, openness = 53, agreeableness = 49, conscientiousness = 57 on a 17-68 scale, yet adding the squared terms buys only +0.010 CV AUC (0.964 -> 0.975, paired p = <0.001) - the curvature is real but small, so the practical story stays 'aim high, then plateau'.
+3. Distinct winning profiles: k = 4 by silhouette (0.327) gives 1 winning cluster out of 4 - 'driven achievers' (n = 88, 89% success) against losing profiles at 32%, 0%, 0% (base rate 53%); forcing k = 5 would show 2 winning clusters but its silhouette drops to 0.212, so evidence for more than one winning type is weak. Honest note: CV AUC is 0.964, well above the 0.65 bar, so the signal is not weak inside this dataset - but n = 161 with the target already supplied pre-labelled in the source file means this is descriptive of these rows, not an externally validated prediction rule.
+
+======================================================================================================================
+saved -> results/sds_odds_ratios.csv, sds_sweet_spots.csv, sds_archetypes.csv

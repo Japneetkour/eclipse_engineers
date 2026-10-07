@@ -1,0 +1,76 @@
+======================================================================================================================
+SKILL PAY UPLIFT - OLS on log(salary), HC1 robust SEs, controls: title_family + location + avg_exp
+n = 14800   salary = salary_avg_lakh (lakhs/yr, band midpoint, log)   skills = 30 keyword dummies
+======================================================================================================================
+model R2 = 0.493   |   experience coefficient = +15.9% per year (so 1 year = 1.0x)   |   reliable skills: 17/30 (15 positive, 2 negative)
+
+----------------------------------------------------------------------------------------------------------------------
+TOP 10 SKILLS BY % UPLIFT
+----------------------------------------------------------------------------------------------------------------------
+skill                   uplift %              95% CI        p  yrs equiv  postings  reliable
+java                       22.8%    [+16.8%, +29.2%]    0.000      1.39x      688   yes
+business_analysis          18.7%    [+12.2%, +25.7%]    0.000      1.16x      603   yes
+sql                        18.2%    [+13.3%, +23.3%]    0.000      1.13x      833   yes
+javascript                 16.5%     [+9.4%, +24.1%]    0.000      1.03x      514   yes
+sas                        16.2%    [+10.0%, +22.8%]    0.000      1.02x      541   yes
+data_analytics             15.0%     [+6.8%, +23.8%]    0.000      0.94x      324   yes
+machine_learning           13.9%     [+7.3%, +21.0%]    0.000      0.88x      554   yes
+outsourcing                13.0%     [+7.4%, +18.8%]    0.000      0.82x      337   yes
+html                       11.5%     [+3.1%, +20.7%]    0.007      0.74x      292   yes
+financial_analysis         10.7%     [+0.8%, +21.5%]    0.033      0.69x      220   yes
+
+----------------------------------------------------------------------------------------------------------------------
+BOTTOM 5 SKILLS BY % UPLIFT
+----------------------------------------------------------------------------------------------------------------------
+skill                   uplift %              95% CI        p  yrs equiv  postings  reliable
+data_analysis              -3.0%      [-8.9%, +3.2%]    0.336     -0.21x      555   no
+accounting                 -3.1%     [-10.8%, +5.4%]    0.464     -0.21x      349   no
+auditing                   -3.2%     [-12.5%, +7.1%]    0.529     -0.22x      229   no
+excel                     -10.9%     [-17.7%, -3.5%]    0.005     -0.78x      343   yes
+seo                       -11.6%     [-17.8%, -4.9%]    0.001     -0.83x      460   yes
+
+NOT statistically reliable (13 of 30, CI contains 0): spark (+9.1%, p=0.05), data_science (+7.1%, p=0.13), big_data (+5.8%, p=0.17), project_management (+5.0%, p=0.13), market_research (+2.8%, p=0.59), sales (+1.0%, p=0.80), digital_marketing (+0.4%, p=0.91), marketing (+0.3%, p=0.95), business_development (-1.2%, p=0.81), hadoop (-1.6%, p=0.70), data_analysis (-3.0%, p=0.34), accounting (-3.1%, p=0.46), auditing (-3.2%, p=0.53)
+
+======================================================================================================================
+CROSS-CHECK: GradientBoostingRegressor, 5-fold CV (shuffled, seed 42), permutation importance
+======================================================================================================================
+CV R2 per fold: [0.496 0.556 0.526 0.543 0.568]   ->   mean 0.538 +/- 0.025 (OLS in-sample R2 = 0.493)
+permutation importance = mean drop in test R2 when that skill column is shuffled
+
+skill                   perm dR2   +- sd  OLS uplift  reliable
+big_data                  0.0030  0.0009        5.8%        no
+project_management        0.0027  0.0006        5.0%        no
+business_analysis         0.0019  0.0001       18.7%       yes
+hadoop                    0.0018  0.0006       -1.6%        no
+seo                       0.0017  0.0014      -11.6%       yes
+accounting                0.0016  0.0005       -3.1%        no
+business_development      0.0015  0.0008       -1.2%        no
+digital_marketing         0.0012  0.0003        0.4%        no
+r                         0.0011  0.0005        8.6%       yes
+sas                       0.0009  0.0005       16.2%       yes
+  ...
+marketing                 0.0000  0.0003        0.3%        no
+java                      0.0000  0.0001       22.8%       yes
+finance                   0.0000  0.0000       10.2%       yes
+sales                     0.0000  0.0001        1.0%        no
+data_analysis            -0.0000  0.0001       -3.0%        no
+
+Spearman rank correlation (OLS uplift vs permutation importance, 30 skills) = -0.22
+OLS top-10 that also appear in GB top-10: 2/10 -> business_analysis, sas
+skills flagged negative by BOTH methods: none
+OLS-positive-and-reliable skills confirmed in GB top-5: business_analysis
+GB top-5 NOT in OLS top-10: big_data, project_management, hadoop, seo (ups +5.8%, +5.0%, -1.6%, -11.6%, reliable: none)
+
+======================================================================================================================
+FINAL ANSWER
+======================================================================================================================
+1. The three most valuable skills, holding experience, location and title fixed, are java (+22.8%, 95% CI +16.8% to +29.2%, p < 0.001 = 1.39 years of experience equivalent), business_analysis (+18.7%, CI +12.2% to +25.7%, 1.16 yrs) and sql (+18.2%, CI +13.3% to +23.3%, 1.13 yrs).
+2. The gradient boosting cross-check (5-fold CV R2 = 0.538 +/- 0.025) agrees only partly: it also puts business_analysis, sas in its own top 10 (shuffling business_analysis costs 0.0019 of test R2), but the two rankings correlate at just Spearman -0.22 (2/10 top-10 overlap) because permutation importance is sign-blind - it counts a skill that pushes pay DOWN (seo, -11.6%) as just as important and puts rare skills like big_data, project_management, hadoop ahead of java, so only business_analysis and seo are confirmed by both methods, and java - the OLS top pick - is worth 0.0000 R2 to the GB model once title and location are in.
+3. 13 of the 30 skills have no real effect (p >= 0.05 and the 95% CI contains 0): spark, data_science, big_data, project_management, market_research, sales, digital_marketing, marketing, business_development, hadoop, data_analysis, accounting, auditing - for these the data cannot separate the coefficient from zero, so their apparent -3%..9% spread is noise, not pay signal.
+
+LIMITATIONS
+----------------------------------------------------------------------------------------------------------------------
+1. Observational data: a skill's coefficient is a partial correlation, not a causal ROI - skills co-occur (java with outsourcing/contract roles, sql with senior engineering), hiring teams pick skills they already pay for, and a keyword match in key_skills shows the posting lists the skill, not that the candidate has it.
+2. Salary is a band midpoint (0to3, 6to10, ...) so all uplifts are on a coarsened outcome, some skills appear in only ~220-350 postings (wide CIs), the GB permutation importance splits credit unpredictably between correlated skills, and CV R2 = 0.54 leaves about 46% of pay variance unexplained.
+======================================================================================================================
+saved -> results/skill_uplift_table.csv, skill_gb_importance.csv

@@ -1,0 +1,52 @@
+================================================================================================
+CLEANING LOG
+================================================================================================
+file                        issue                                                 n   action
+------------------------------------------------------------------------------------------------
+DataScience Jobs.csv        avg/min/max_salary stored as text ('7.8L')         4806   stripped the L, stored as float lakhs/year
+DataScience Jobs.csv        salary text that could not be parsed                  0   set to NaN
+DataScience Jobs.csv        min_salary > max_salary                               0   checked all 1602 rows, swapped the pair where found
+DataScience Jobs.csv        company_name variants (Barclays Shared Services, GE Healthcare, ...)   95   merged into parent brand, 642 -> 609 companies
+DataScience Jobs.csv        duplicate posting (identical except reference_no)     0   dropped, keep='first'
+DataScience Jobs.csv        avg_salary outside 3.0xIQR [-21.1-45.9 LPA]           5   dropped
+JDS Skill Traits.xlsx       skill score outside 1-5                               0   set to missing (scale only allows 1-5)
+JDS Skill Traits.xlsx       duplicate row (same 5 scores + target, id ignored)   21   dropped, keep='first'
+JDS Skill Traits.xlsx       row missing a skill score or target                   0   dropped
+JDS Skill Traits.xlsx       target High/Low -> 1/0                                0   already 0/1, cast to int
+SDS Personality Traits.xlsx trait stored as text                                  0   converted to number, unreadable -> NaN
+SDS Personality Traits.xlsx trait value more than 4 SD from the mean              0   value removed, row dropped (milder 3-4 SD values kept)
+SDS Personality Traits.xlsx row missing a trait value                             0   dropped (no imputation on 161 rows)
+SDS Personality Traits.xlsx target High/Low -> 1/0                                0   already 0/1, cast to int
+------------------------------------------------------------------------------------------------
+DataScience Jobs.csv        ROWS                                               1597   (was 1602, dropped 5) -> dsjobs_clean.csv
+JDS Skill Traits.xlsx       ROWS                                                118   (was 139, dropped 21) -> jds_clean.csv
+SDS Personality Traits.xlsx ROWS                                                161   (was 161, dropped 0) -> sds_clean.csv
+================================================================================================
+renamed columns:
+    maths-stats_skills -> maths_stats_skills
+     extraversion -> extraversion
+    success_ classification_ high_low -> success_high_low
+
+CLASS BALANCE
+------------------------------------------------------------------------------------------------
+dsjobs_clean.csv  job_title (10 classes):
+    Data Scientist                    188  (11.8%)
+    Business Analyst                  188  (11.8%)
+    Data Engineer                     188  (11.8%)
+    Data Analyst                      187  (11.7%)
+    Senior Business Analyst           187  (11.7%)
+    Senior Data Analyst               187  (11.7%)
+    Senior Data Scientist             183  (11.5%)
+    Senior Data Engineer              181  (11.3%)
+    Machine Learning Engineer          59  (3.7%)
+    Data Architect                     49  (3.1%)
+jds_clean.csv     salary_hike_high_or_low (1 = high/success):
+    0                                  58  (49.2%)
+    1                                  60  (50.8%)
+    minority class                     58  -> balanced
+sds_clean.csv     success_high_low (1 = high/success):
+    0                                  76  (47.2%)
+    1                                  85  (52.8%)
+    minority class                     76  -> balanced
+------------------------------------------------------------------------------------------------
+saved -> C:\Users\Admin\Downloads\SkillsVsLabels_Software - Copy\SkillsVsLabels\data\clean\dsjobs_clean.csv | C:\Users\Admin\Downloads\SkillsVsLabels_Software - Copy\SkillsVsLabels\data\clean\jds_clean.csv | C:\Users\Admin\Downloads\SkillsVsLabels_Software - Copy\SkillsVsLabels\data\clean\sds_clean.csv

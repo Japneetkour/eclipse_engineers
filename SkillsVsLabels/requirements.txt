@@ -1,0 +1,12 @@
+pandas>=1.5
+numpy>=1.23
+scipy>=1.9
+scikit-learn>=1.2
+statsmodels>=0.14
+matplotlib>=3.6
+openpyxl>=3.1
+joblib>=1.2
+plotly>=5.15
+streamlit>=1.46
+pypdf>=3.0
+python-docx>=1.0

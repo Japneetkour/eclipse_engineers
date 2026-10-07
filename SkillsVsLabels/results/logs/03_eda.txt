@@ -1,0 +1,29 @@
+loaded: analytics (14800, 44), jds (118, 7), sds (161, 7)
+  saved figures\01_salary_distribution.png
+  saved figures\02_salary_vs_experience.png
+  saved figures\03_median_salary_by_location.png
+  saved figures\04_median_salary_by_title_family.png
+  saved figures\05_top20_skills_demand.png
+  saved figures\06_correlation_heatmap.png
+  saved figures\07_jds_skills_by_salary_hike.png
+  saved figures\08_sds_traits_by_success.png
+
+============================================================================================
+5 PATTERNS TO TEST WITH STATISTICS
+============================================================================================
+
+1. Title premium vs skills - the core question
+   Median salary is 12.5 LPA for Data Engineer vs 8.0 for BI. Test with nested OLS on log(salary): Model A = title_family + exp, Model B = A + skill_xxx. If the title coefficients shrink a lot in B, titles are paying for skills in disguise (compare R2 with a partial F-test).
+
+2. Skills look worthless raw, but not after controls (Simpson's paradox)
+   Raw correlation of salary with skill_python = 0.05, skill_sql = 0.01, yet the median gap is +4.5 LPA for SQL and +4.5 for Python. Test: partial correlation / regression coefficient of each skill after controlling for location + title_family + avg_exp. The sign flip is the interesting result.
+
+3. Experience dominates every skill
+   corr(log salary, avg_exp) = 0.64 vs at most 0.10 for any single skill. Test: does adding all 30 skills beat an exp-only model (cross-validated R2 / F-test), and is an exp^2 term significant?
+
+4. JDS juniors: which skill actually buys the hike
+   Every score is higher for hike=1, biggest gaps: dashboard_and_storytelling_skills +0.94, maths_stats_skills +0.75, ai_and_ml_skills +0.56, coding_skills +0.65, big_data_skills +0.29 (1-5 scale). Test: logistic regression on 118 rows, odds ratios per 1 SD with bootstrap CIs - dashboard/storytelling looks like the strongest single driver.
+
+5. SDS seniors: conscientiousness nearly separates success from failure
+   Success rate rises from 0% in the bottom conscientiousness quartile to 84% in the top (mean 36 vs 54). Test: logistic regression + a quadratic (sweet-spot) term, compare linear vs polynomial CV AUC - the quartile table suggests a threshold, not a straight line.
+

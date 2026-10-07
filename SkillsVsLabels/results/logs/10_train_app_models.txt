@@ -1,0 +1,4 @@
+[salary]  GB 5-fold CV R2 = 0.537 +- 0.026, typical error ~64.9%
+[hike]  CV AUC = 0.886 +- 0.068, accuracy = 0.836 (majority guess 0.508)
+[success]  CV AUC = 0.975 +- 0.026, accuracy = 0.930 (majority guess 0.528)
+saved -> models/*.joblib, results/model_metrics.json

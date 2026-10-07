@@ -1,0 +1,46 @@
+==============================================================================================================
+TITLE LADDER - dsjobs_clean.csv (company x title rows, avg_salary in lakhs/yr)
+==============================================================================================================
+n = 1597 rows   companies = 608   titles = 10
+
+DEMAND vs PAY by title
+                           rows  postings  median_salary  median_min_exp  share_of_postings_pct
+job_title                                                                                      
+Data Architect               49       524           23.9            10.0                    0.6
+Senior Data Scientist       183      2102           21.1             4.0                    2.3
+Senior Data Engineer        181      3401           17.5             4.0                    3.7
+Senior Business Analyst     187     14115           13.0             4.0                   15.2
+Data Scientist              188      9051           12.8             2.0                    9.7
+Data Engineer               188      8044           10.9             1.0                    8.7
+Machine Learning Engineer    59       964            9.1             1.0                    1.0
+Senior Data Analyst         187      3825            8.6             3.0                    4.1
+Business Analyst            188     32843            8.3             2.0                   35.3
+Data Analyst                187     18095            5.0             1.0                   19.5
+Spearman(postings, median salary) across titles = -0.65 (p = 0.043)
+
+OLS log(salary) ~ experience + title (HC3)   R2 = 0.580   each extra year of required experience = +11.9%
+                job_title  premium_vs_data_analyst_pct   ci_lo   ci_hi   p
+    Senior Data Scientist                      193.697 166.633 223.508 0.0
+           Data Scientist                      133.682 113.379 155.916 0.0
+     Senior Data Engineer                      131.515 109.197 156.215 0.0
+            Data Engineer                       97.967  79.751 118.028 0.0
+  Senior Business Analyst                       73.639  57.164  91.842 0.0
+           Data Architect                       69.555  43.031 100.998 0.0
+Machine Learning Engineer                       62.314  40.759  87.169 0.0
+         Business Analyst                       52.501  39.398  66.836 0.0
+      Senior Data Analyst                       35.882  22.257  51.026 0.0
+
+'SENIOR' LABEL PREMIUM (raw median gap vs gap at the same required experience)
+            role  raw_senior_premium_pct  same_experience_premium_pct  extra_years_required
+    Data Analyst                    72.0                         35.9                   2.0
+  Data Scientist                    64.8                         25.7                   2.0
+   Data Engineer                    61.3                         16.9                   3.0
+Business Analyst                    56.6                         13.9                   2.0
+
+==============================================================================================================
+FINAL ANSWER
+==============================================================================================================
+1. The label moves pay even at equal experience: a Senior Data Scientist posting pays +194% vs a Data Analyst posting asking for the same years (R2 = 0.58); each extra year adds +12%.
+2. Demand and pay point in opposite directions (Spearman -0.65): Business Analyst + Data Analyst hold 55% of postings at medians of 8.3L and 5.0L, while Data Architect pays 23.9L.
+3. 'Senior' is worth 14-36% on top of the base role at the same experience - the word itself carries pay.
+saved -> results/dsjobs_demand_vs_pay.csv, dsjobs_title_ladder.csv, dsjobs_senior_premium.csv
